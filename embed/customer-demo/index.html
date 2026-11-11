@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1110">
+  <title>Örnek Bilet Sitesi · Seatview embed</title>
+  <link rel="stylesheet" href="/shop.css">
+</head>
+<body>
+  <header class="shop-header">
+    <div class="shop-brand">CineShop Demo</div>
+    <p class="shop-tag">Ayrı origin · <code id="host-origin"></code></p>
+  </header>
+
+  <main class="shop-main">
+    <section class="shop-hero">
+      <h1>19:45 · IMAX</h1>
+      <p id="vip-banner" class="vip-banner">D8 VIP · iframe içinde A2/B6/D11 önizleme demoları…</p>
+    </section>
+
+    <div class="shop-grid">
+      <section class="widget-wrap" aria-label="Koltuk seçici">
+        <iframe
+          id="seatview-frame"
+          title="Seatview koltuk haritası"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </section>
+
+      <aside class="checkout" aria-live="polite">
+        <h2>Sepet</h2>
+        <p id="selection-summary">Henüz koltuk seçilmedi.</p>
+        <p id="hold-countdown" class="countdown" hidden></p>
+        <p id="checkout-status" class="status"></p>
+        <div class="checkout-actions">
+          <button id="host-checkout" type="button" class="primary" disabled>Demo siparişi onayla</button>
+          <button id="host-forbidden" type="button" class="ghost">İzinsiz origin dene</button>
+        </div>
+        <details class="security-note">
+          <summary>Güvenlik kontrol listesi</summary>
+          <ul>
+            <li id="check-no-key">İşletme API anahtarı sayfa kaynağında yok.</li>
+            <li>Onay <code>POST /api/checkout</code> ile bu origin’in backend’inden gider.</li>
+            <li>Widget yalnızca kısa ömürlü embed token kullanır.</li>
+          </ul>
+        </details>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module" src="/shop.js"></script>
+</body>
+</html>

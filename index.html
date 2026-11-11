@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111512">
+  <title>Seatview · Salon 03</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="brand"><span class="brand-icon" aria-hidden="true">◉</span> Seatview</div>
+      <span class="badge"><span aria-hidden="true"></span> ETKİLEŞİMLİ PROTOTİP</span>
+      <a id="panel-link" class="badge" href="/panel/#/sessions" style="text-decoration:none;color:inherit">← Panel</a>
+    </header>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">MERIDIAN SİNEMASI / SALON 03</p>
+      <h1 id="page-title">Koltuk seç</h1>
+      <p>Haritadan bir koltuk seç, perdeyi o koltuğun göz hizasından gör.</p>
+    </section>
+    <div class="layout">
+      <section class="panel map-panel" aria-labelledby="map-title">
+        <div class="panel-header">
+          <h2 id="map-title">Salon planı</h2>
+          <span class="showtime">19:45 · IMAX</span>
+        </div>
+        <div class="screen">PERDE</div>
+        <div id="seat-map" class="seat-map" aria-label="Salonun koltukları"></div>
+        <ul class="legend">
+          <li><i></i> Boş</li><li><i></i> Dolu</li><li><i></i> Recliner</li><li><i></i> Seçili</li>
+        </ul>
+      </section>
+      <aside class="panel details" aria-labelledby="selected-title">
+        <p class="eyebrow">SEÇİMİN</p>
+        <h2 id="selected-title" aria-live="polite">Koltuk seçilmedi</h2>
+        <p id="selected-detail">Planın üzerinde boş bir koltuğa dokun.</p>
+        <button id="preview-button" class="action" type="button" disabled>Bu koltuktan bak <span aria-hidden="true">↗</span></button>
+        <div class="hold-actions">
+          <button id="buy-button" class="action" type="button" disabled>Demo satın al</button>
+          <button id="cancel-button" class="action secondary" type="button" disabled>İptal et</button>
+        </div>
+        <p id="reserve-status" class="reserve-status" aria-live="polite">Müsaitlik bekleniyor…</p>
+        <div class="demo-seats">
+          <span>A2 · B6 · D11 görüş demoları</span>
+          <div id="quick-seats"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <dialog id="preview-dialog" aria-labelledby="preview-title">
+    <div class="viewport">
+      <canvas id="scene" aria-label="Seçilen koltuktan simüle edilen perde görünümü"></canvas>
+      <p id="preview-loading" class="preview-loading" hidden aria-live="polite">Görüş modülü yükleniyor…</p>
+      <p id="preview-load-hint" class="preview-load-hint" hidden></p>
+      <button id="close-preview" class="close" type="button" aria-label="Haritaya dön">‹</button>
+      <span class="view-tag" id="view-tag"></span>
+    </div>
+    <div class="preview-info">
+      <p class="eyebrow" id="preview-eyebrow">KOLTUK GÖRÜŞÜ · SİMÜLASYON</p>
+      <h2 id="preview-title"></h2>
+      <p id="preview-category"></p>
+      <dl class="metrics" id="preview-metrics">
+        <div><dt>Perdeye mesafe</dt><dd id="metric-distance"></dd></div>
+        <div><dt>Perdenin görüş açısı</dt><dd id="metric-angle"></dd></div>
+        <div><dt>Merkeze uzaklık</dt><dd id="metric-offset"></dd></div>
+      </dl>
+      <button id="change-seat" class="action" type="button">Koltuk değiştir</button>
+    </div>
+  </dialog>
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

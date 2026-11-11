@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+api/node_modules/
+
+# Build
+api/dist/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS & editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local data
+seatview_pg/

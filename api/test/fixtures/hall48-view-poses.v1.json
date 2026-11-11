@@ -1,0 +1,68 @@
+{
+  "contractVersion": "view-geometry.v1",
+  "description": "S4-01 referans pozları — PlanDraftsService.buildHall48Layout() ile üretilen 48 koltuk (4×12, ortada koridor). Metre cinsinden plan uzayı: +X sağ, +Y yukarı, +Z perdeden seyirciye.",
+  "source": {
+    "generator": "api/src/plan/plan-drafts.service.ts#makeSeat",
+    "constants": { "pitchM": 0.64, "aisleGapM": 0.9, "rowStepZM": 1.12, "rowRiserM": 0.25, "frontRowZM": 5.2 }
+  },
+  "screen": {
+    "widthM": 6.0,
+    "bottomM": 1.4,
+    "heightM": 3.2,
+    "centerTarget": { "xM": 0, "yM": 3.0, "zM": 0 }
+  },
+  "viewerDefaults": {
+    "eyeHeightAboveSeatYM": 1.14,
+    "note": "Oturan göz yüksekliği simülasyonu; şu an plan-contract.js sabiti."
+  },
+  "referenceSeats": [
+    {
+      "label": "A2",
+      "row": "A",
+      "column": 2,
+      "narrative": "Ön sıra, sol blok — önden ve soldan bakış",
+      "plan": { "xM": -1.41, "seatFloorYM": 0, "zM": 5.2 },
+      "rowRiser": { "rowIndex": 0, "floorYM": 0 },
+      "cameraEye": { "xM": -1.41, "yM": 1.14, "zM": 5.2 },
+      "cameraLookAt": { "xM": 0, "yM": 3.0, "zM": 0 },
+      "infoCard": {
+        "distanceToScreenCenterM": 5.39,
+        "lateralOffsetFromScreenCenterM": 1.41,
+        "side": "sol",
+        "screenAngleDeg": 57
+      }
+    },
+    {
+      "label": "B6",
+      "row": "B",
+      "column": 6,
+      "narrative": "İkinci sıra, sol blokun koridor kenarı — merkeze yakın, hafif sağ",
+      "plan": { "xM": 1.15, "seatFloorYM": 0.25, "zM": 6.32 },
+      "rowRiser": { "rowIndex": 1, "floorYM": 0.25 },
+      "cameraEye": { "xM": 1.15, "yM": 1.39, "zM": 6.32 },
+      "cameraLookAt": { "xM": 0, "yM": 3.0, "zM": 0 },
+      "infoCard": {
+        "distanceToScreenCenterM": 6.42,
+        "lateralOffsetFromScreenCenterM": 1.15,
+        "side": "sağ",
+        "screenAngleDeg": 50
+      }
+    },
+    {
+      "label": "D11",
+      "row": "D",
+      "column": 11,
+      "narrative": "Arka VIP sırası, sağ blok — arkadan ve sağdan bakış",
+      "plan": { "xM": 1.41, "seatFloorYM": 0.75, "zM": 8.56 },
+      "rowRiser": { "rowIndex": 3, "floorYM": 0.75 },
+      "cameraEye": { "xM": 1.41, "yM": 1.89, "zM": 8.56 },
+      "cameraLookAt": { "xM": 0, "yM": 3.0, "zM": 0 },
+      "infoCard": {
+        "distanceToScreenCenterM": 8.68,
+        "lateralOffsetFromScreenCenterM": 1.41,
+        "side": "sağ",
+        "screenAngleDeg": 38
+      }
+    }
+  ]
+}

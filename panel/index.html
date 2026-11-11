@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seatview · İşletme paneli</title>
+  <link rel="stylesheet" href="/panel/panel.css">
+  <link rel="stylesheet" href="/panel/editor.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <div class="brand" data-brand>Seatview panel</div>
+      <span class="env-badge" data-env-badge>Ortam: test</span>
+    </header>
+    <nav class="nav" aria-label="Panel menüsü">
+      <a href="#/venues" data-nav="venues">Salonlar</a>
+      <a href="#/sessions" data-nav="sessions">Seanslar</a>
+      <a href="#/sessions/new" data-nav="new">Yeni seans</a>
+      <a href="#/venues" data-nav="editor">Plan editörü</a>
+    </nav>
+    <div id="flash" hidden></div>
+    <main id="view" aria-live="polite"></main>
+  </div>
+  <script type="module" src="/panel/panel.js"></script>
+</body>
+</html>

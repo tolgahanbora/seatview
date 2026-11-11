@@ -1,0 +1,19 @@
+{
+  "name": "seatview-starter",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "check": "node --check dev.mjs && node --check src/app.js && node --check src/hall.js && node --check src/hall-state.js && node --check src/hall-loader.js && node --check src/plan-contract.js && node --check src/geometry-adapter.js && node --check src/geometry-math.js && node --check src/preview-loader.js && node --check src/preview.js && node --check src/demo-api.js && node --check src/embed-bridge.js && node --check embed/customer-demo/server.mjs && node --check embed/customer-demo/shop.js && node --check panel/panel.js && node --check panel/api.js && node --check panel/editor.js && node --check panel/editor-tools.js",
+    "customer:dev": "node embed/customer-demo/server.mjs",
+    "bench:preview": "node scripts/s4-preview-bench.mjs",
+    "db:up": "docker compose up -d postgres",
+    "db:setup": "bash scripts/db-setup-local.sh",
+    "api:dev": "npm run start:dev --prefix api",
+    "api:migrate": "npm run migration:run --prefix api",
+    "api:seed": "npm run seed --prefix api",
+    "api:test": "npm run test:int --prefix api"
+  }
+}

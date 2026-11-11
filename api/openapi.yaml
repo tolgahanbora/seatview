@@ -1,0 +1,438 @@
+openapi: 3.1.0
+info:
+  title: Seatview Rezervasyon API
+  version: 0.3.0
+  description: |
+    Seans envanteri, tutma/onay, seans satış ayarları (S3-02) ve embed oturumu (S3-03).
+    Müşteri checkout’u yalnızca işletme API anahtarıyla sunucudan confirm eder; widget embed token kullanır.
+
+servers:
+  - url: http://127.0.0.1:3000
+    description: Yerel geliştirme
+
+security:
+  - BusinessApiKey: []
+
+paths:
+  /sessions/{sessionId}/seats:
+    get:
+      tags: [Envanter]
+      summary: Seans koltuk müsaitliği
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Koltuk listesi ve durumları
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionId, seats]
+                properties:
+                  sessionId:
+                    type: string
+                    format: uuid
+                  seats:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SeatAvailability'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /sessions/{sessionId}/holds:
+    post:
+      tags: [Tutma]
+      summary: Bir veya birden fazla koltuğu atomik olarak tut
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [seatIds]
+              properties:
+                seatIds:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    example: B4
+      responses:
+        '201':
+          description: Tutma oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hold'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /holds/{holdId}/confirm:
+    post:
+      tags: [Tutma]
+      summary: Tutmayı rezervasyona çevir (idempotent orderKey)
+      parameters:
+        - $ref: '#/components/parameters/HoldId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderKey]
+              properties:
+                orderKey:
+                  type: string
+                  description: İşletme tarafı sipariş anahtarı
+      responses:
+        '200':
+          description: Rezervasyon (yeni veya önceki aynı orderKey)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '410':
+          description: Tutma süresi dolmuş
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /holds/{holdId}/release:
+    post:
+      tags: [Tutma]
+      summary: Aktif tutmayı serbest bırak
+      parameters:
+        - $ref: '#/components/parameters/HoldId'
+      responses:
+        '204':
+          description: Serbest bırakıldı
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /sessions/{sessionId}/sales:
+    get:
+      tags: [Seans]
+      summary: Seans satış ayarlarını oku
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/SeatviewEnvironment'
+      responses:
+        '200':
+          description: Satış durumu, kategori fiyatları ve bloklar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionSales'
+    patch:
+      tags: [Seans]
+      summary: Satışı aç/kapa, kategori fiyatı ve koltuk blokajı
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/SeatviewEnvironment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchSessionSales'
+      responses:
+        '200':
+          description: Güncellenmiş satış ayarları
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionSales'
+
+  /embed-sessions:
+    post:
+      tags: [Embed]
+      summary: Kısa ömürlü embed oturumu oluştur (müşteri backend)
+      parameters:
+        - $ref: '#/components/parameters/SeatviewEnvironment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionId, hostOrigin]
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+                hostOrigin:
+                  type: string
+                  example: http://127.0.0.1:4280
+      responses:
+        '201':
+          description: Widget URL ve embed token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbedSessionCreated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /embed/sessions/{sessionId}/seats:
+    get:
+      tags: [Embed]
+      summary: Embed token ile müsaitlik
+      security:
+        - EmbedBearer: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Koltuk listesi
+        '401':
+          description: Geçersiz veya süresi dolmuş token
+
+  /embed/sessions/{sessionId}/holds:
+    post:
+      tags: [Embed]
+      summary: Embed token ile tutma
+      security:
+        - EmbedBearer: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [seatIds]
+              properties:
+                seatIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Tutma oluşturuldu
+        '403':
+          description: Satış kapalı
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /embed/holds/{holdId}/release:
+    post:
+      tags: [Embed]
+      summary: Embed token ile tutmayı bırak
+      security:
+        - EmbedBearer: []
+      parameters:
+        - $ref: '#/components/parameters/HoldId'
+      responses:
+        '204':
+          description: Serbest bırakıldı
+
+components:
+  securitySchemes:
+    BusinessApiKey:
+      type: apiKey
+      in: header
+      name: X-Business-Api-Key
+    EmbedBearer:
+      type: http
+      scheme: bearer
+      description: POST /embed-sessions yanıtındaki embedToken (SHA-256 hash ile sunucuda doğrulanır)
+
+  parameters:
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    HoldId:
+      name: holdId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SeatviewEnvironment:
+      name: X-Seatview-Environment
+      in: header
+      required: true
+      schema:
+        type: string
+        enum: [test, live]
+
+  schemas:
+    SessionCategoryPrice:
+      type: object
+      required: [category, amountCents, currency]
+      properties:
+        category:
+          type: string
+        amountCents:
+          type: integer
+        currency:
+          type: string
+    PatchSessionSales:
+      type: object
+      properties:
+        salesOpen:
+          type: boolean
+        categoryPrices:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionCategoryPrice'
+        blockedSeatIds:
+          type: array
+          items:
+            type: string
+        unblockSeatIds:
+          type: array
+          items:
+            type: string
+    SessionSales:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        salesOpen:
+          type: boolean
+        categoryPrices:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionCategoryPrice'
+        blockedSeatIds:
+          type: array
+          items:
+            type: string
+    EmbedSessionCreated:
+      type: object
+      required: [contractVersion, embedToken, widgetUrl, expiresAt, sessionId]
+      properties:
+        contractVersion:
+          type: string
+          example: embed.v1
+        embedToken:
+          type: string
+        embedSessionId:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        widgetUrl:
+          type: string
+        hostOrigin:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        environment:
+          type: string
+          enum: [test, live]
+    SeatAvailability:
+      type: object
+      required: [seatId, status]
+      properties:
+        seatId:
+          type: string
+        row:
+          type: string
+        column:
+          type: integer
+        category:
+          type: string
+        price:
+          type: integer
+          description: Küçük para birimi (ör. kuruş)
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [available, held, reserved, blocked]
+        holdExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Hold:
+      type: object
+      required: [id, sessionId, seatIds, expiresAt, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        seatIds:
+          type: array
+          items:
+            type: string
+        expiresAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active]
+
+    Reservation:
+      type: object
+      required: [id, sessionId, orderKey, seatIds, confirmedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        orderKey:
+          type: string
+        seatIds:
+          type: array
+          items:
+            type: string
+        confirmedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    NotFound:
+      description: Kayıt bulunamadı
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: İşletme bu kaynağa erişemez
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Koltuk müsait değil veya durum çakışması
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
