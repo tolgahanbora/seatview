@@ -3,6 +3,15 @@ import { hall as legacyHall } from './hall.js';
 import { layoutToHall } from './plan-contract.js';
 import { setHall } from './hall-state.js';
 
+/** API planında koltuk koordinatları yoksa (ör. seed pos_x=0) önizleme çalışmaz. */
+function layoutHasUsableGeometry(layout) {
+  const seats = layout?.seats ?? [];
+  if (!seats.length) return false;
+  const maxZ = Math.max(...seats.map((s) => Number(s.z) || 0));
+  const spreadX = Math.max(...seats.map((s) => Math.abs(Number(s.x) || 0)));
+  return maxZ > 0.5 && spreadX > 0.1;
+}
+
 /**
  * @returns {Promise<{ mode: 'session' | 'draft' | 'legacy', hall: object, planVersionId?: string }>}
  */
@@ -28,6 +37,15 @@ export async function loadHallGeometry() {
       const payload = await layoutResponse.json();
       const seats = payload.layout?.seats ?? [];
       if (seats.length >= 100 && !payload.layout?.screen) {
+        setHall(legacyHall);
+        return { mode: 'legacy', hall: legacyHall, planVersionId: payload.planVersionId };
+      }
+      if (seats.length && layoutHasUsableGeometry(payload.layout)) {
+        const hall = layoutToHall(payload.layout);
+        setHall(hall);
+        return { mode: 'session', hall, planVersionId: payload.planVersionId };
+      }
+      if (seats.length >= legacyHall.seats.length * 0.9) {
         setHall(legacyHall);
         return { mode: 'legacy', hall: legacyHall, planVersionId: payload.planVersionId };
       }

@@ -118,6 +118,25 @@ function interpolateCamera(seat, hall, remaining) {
   };
 }
 
+/** Göz sabit; bakış yönünü yatay eksende çevir (radyan). */
+function cameraWithYaw(camera, yawDelta) {
+  if (!yawDelta) return camera;
+  const lookAt = camera.lookAt ?? { x: 0, y: 3, z: 0 };
+  const dx = lookAt.x - camera.x;
+  const dz = lookAt.z - camera.z;
+  const dist = Math.hypot(dx, dz) || 1;
+  const angle = Math.atan2(dx, dz);
+  const next = angle + yawDelta;
+  return {
+    ...camera,
+    lookAt: {
+      x: camera.x + Math.sin(next) * dist,
+      y: lookAt.y,
+      z: camera.z + Math.cos(next) * dist,
+    },
+  };
+}
+
 function drawScene(context, width, height, camera, screen, chairs) {
   const glow = context.createLinearGradient(0, 0, 0, height);
   glow.addColorStop(0, '#080908');
@@ -155,6 +174,10 @@ function drawScene(context, width, height, camera, screen, chairs) {
   for (const face of visibleChairs) draw(face.fill, face.vertices);
 }
 
+const MAX_YAW = 0.75;
+const PAN_STEP = 0.09;
+const PAN_DRAG = 0.0032;
+
 export function createPreview(canvas) {
   const context = canvas.getContext('2d');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -163,6 +186,12 @@ export function createPreview(canvas) {
   let chairs;
   let startedAt;
   let screenFaces;
+  let yawOffset = 0;
+  let introComplete = false;
+  let dragging = false;
+  let dragX = 0;
+  /** @type {(() => void) | undefined} */
+  let detachLookControls;
 
   function draw(now) {
     if (!activeSeat) return;
@@ -177,15 +206,100 @@ export function createPreview(canvas) {
 
     const progress = reducedMotion.matches ? 1 : Math.min((now - startedAt) / 900, 1);
     const remaining = (1 - progress) ** 3;
-    const camera = interpolateCamera(activeSeat, hall, remaining);
+    introComplete = progress >= 1;
+    const baseCamera = interpolateCamera(activeSeat, hall, remaining);
+    const lookYaw = introComplete ? yawOffset : 0;
+    const camera = cameraWithYaw(baseCamera, lookYaw);
     drawScene(context, width, height, camera, screenFaces, chairs);
     if (progress < 1) frame = requestAnimationFrame(draw);
   }
 
-  const resize = new ResizeObserver(() => {
+  function requestRedraw() {
     if (!activeSeat) return;
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(draw);
+  }
+
+  function clampYaw(value) {
+    return Math.max(-MAX_YAW, Math.min(MAX_YAW, value));
+  }
+
+  function nudgeYaw(delta) {
+    if (!introComplete) return;
+    yawOffset = clampYaw(yawOffset + delta);
+    requestRedraw();
+  }
+
+  function attachLookControls() {
+    canvas.tabIndex = 0;
+    canvas.style.touchAction = 'none';
+
+    const viewport = canvas.closest('.viewport');
+
+    function onPointerDown(event) {
+      if (!introComplete || event.button !== 0) return;
+      dragging = true;
+      dragX = event.clientX;
+      canvas.setPointerCapture(event.pointerId);
+    }
+
+    function onPointerMove(event) {
+      if (!dragging) return;
+      const delta = event.clientX - dragX;
+      dragX = event.clientX;
+      yawOffset = clampYaw(yawOffset + delta * PAN_DRAG);
+      requestRedraw();
+    }
+
+    function onPointerUp(event) {
+      if (!dragging) return;
+      dragging = false;
+      try {
+        canvas.releasePointerCapture(event.pointerId);
+      } catch {
+        /* already released */
+      }
+    }
+
+    function onKeyDown(event) {
+      if (!introComplete) return;
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        nudgeYaw(-PAN_STEP);
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        nudgeYaw(PAN_STEP);
+      }
+    }
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerUp);
+    canvas.addEventListener('keydown', onKeyDown);
+
+    const panLeft = viewport?.querySelector('[data-preview-pan="left"]');
+    const panRight = viewport?.querySelector('[data-preview-pan="right"]');
+    const onPanLeft = () => nudgeYaw(-PAN_STEP);
+    const onPanRight = () => nudgeYaw(PAN_STEP);
+    panLeft?.addEventListener('click', onPanLeft);
+    panRight?.addEventListener('click', onPanRight);
+
+    return () => {
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      canvas.removeEventListener('pointermove', onPointerMove);
+      canvas.removeEventListener('pointerup', onPointerUp);
+      canvas.removeEventListener('pointercancel', onPointerUp);
+      canvas.removeEventListener('keydown', onKeyDown);
+      panLeft?.removeEventListener('click', onPanLeft);
+      panRight?.removeEventListener('click', onPanRight);
+      canvas.tabIndex = -1;
+    };
+  }
+
+  const resize = new ResizeObserver(() => {
+    if (!activeSeat) return;
+    requestRedraw();
   });
   resize.observe(canvas);
 
@@ -193,14 +307,24 @@ export function createPreview(canvas) {
     start(seat) {
       cancelAnimationFrame(frame);
       activeSeat = seat;
+      yawOffset = 0;
+      introComplete = reducedMotion.matches;
       screenFaces = makeScreen();
       chairs = makeChairs(seat);
-      startedAt = performance.now();
-      draw(startedAt);
+      detachLookControls?.();
+      detachLookControls = attachLookControls();
+      frame = requestAnimationFrame((now) => {
+        startedAt = now;
+        draw(now);
+      });
     },
     stop() {
       cancelAnimationFrame(frame);
+      detachLookControls?.();
+      detachLookControls = undefined;
       activeSeat = undefined;
+      dragging = false;
+      yawOffset = 0;
     },
   };
 }

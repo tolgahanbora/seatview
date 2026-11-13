@@ -1,0 +1,53 @@
+.editor-canvas-wrap {
+  min-height: 320px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: #0f1310;
+  padding: 1rem;
+}
+
+.editor-screen {
+  margin: 0 auto 0.75rem;
+  max-width: 280px;
+  padding: 0.625rem;
+  text-align: center;
+  border-radius: 8px;
+  background: linear-gradient(#2a2318, #4a3d2a);
+  color: #e8d9b8;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+}
+
+.editor-screen-missing {
+  opacity: 0.45;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: 4px;
+  max-width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+.editor-aisle {
+  grid-column: 7;
+}
+
+.editor-seat {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 1px solid #2f3a32;
+  font-size: 0.65rem;
+  color: #0a100c;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.editor-seat[data-selected='true'] {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}

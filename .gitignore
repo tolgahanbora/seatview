@@ -4,6 +4,7 @@ api/node_modules/
 
 # Build
 api/dist/
+panel-ui/dist/
 *.tsbuildinfo
 
 # Environment & secrets

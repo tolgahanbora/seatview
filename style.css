@@ -63,7 +63,39 @@ dialog::backdrop { background: #080b09d9; }
 .viewport { height: min(52vh, 440px); min-height: 220px; position: relative; background: #121310; }
 canvas { display: block; width: 100%; height: 100%; }
 .close { position: absolute; top: 14px; left: 14px; height: 42px; font-size: 1.65rem; line-height: .8; }
-.view-tag { position: absolute; top: 19px; left: 50%; transform: translateX(-50%); border-radius: 999px; background: #18221bd9; color: var(--green); padding: 5px 12px; font-size: .78rem; white-space: nowrap; }
+.view-tag { position: absolute; top: 19px; left: 50%; transform: translateX(-50%); border-radius: 999px; background: #18221bd9; color: var(--green); padding: 5px 12px; font-size: .78rem; white-space: nowrap; max-width: calc(100% - 120px); overflow: hidden; text-overflow: ellipsis; }
+.pan-controls {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+.pan-btn {
+  min-width: 44px;
+  height: 44px;
+  border: 1px solid #48564a;
+  border-radius: 999px;
+  background: #202923e6;
+  color: var(--ink);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.pan-btn:hover { border-color: var(--green); color: var(--green); }
+.pan-hint {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  margin: 0;
+  color: var(--muted);
+  font-size: .68rem;
+  max-width: min(48%, 200px);
+  line-height: 1.25;
+  pointer-events: none;
+}
+#scene:focus { outline: 2px solid var(--green); outline-offset: -2px; }
 .preview-info { padding: 18px 22px 22px; }
 .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
 .metrics div { background: #232b25; border-radius: 12px; padding: 10px; }
@@ -75,7 +107,7 @@ body.embed-mode h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); }
 body.embed-mode .map-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 body.embed-mode .seat-map { min-width: 320px; }
 .map-panel { overflow: auto; max-height: min(72vh, 520px); -webkit-overflow-scrolling: touch; }
-.preview-loading {
+.preview-loading:not([hidden]) {
   position: absolute;
   inset: 0;
   display: grid;
@@ -86,11 +118,12 @@ body.embed-mode .seat-map { min-width: 320px; }
   font-size: 0.92rem;
   font-weight: 650;
 }
-.preview-load-hint {
+.preview-load-hint:not([hidden]) {
   position: absolute;
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
+  display: block;
   margin: 0;
   color: var(--muted);
   font-size: 0.72rem;

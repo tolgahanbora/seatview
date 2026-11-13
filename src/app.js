@@ -456,9 +456,9 @@ async function openPreview() {
     ? 'Hareket azaltma: doğrudan göz hizası.'
     : 'Salon özeti → göz hizası geçişi…';
   dialog.showModal();
-  populatePreviewDialog();
 
   try {
+    populatePreviewDialog();
     const engine = await loadPreviewEngine(sceneCanvas, { forceFail: PREVIEW_FAIL });
     if (selected?.id !== selectedId) {
       dialog.close();
@@ -469,7 +469,7 @@ async function openPreview() {
       previewLoadHint.textContent += ' Modül ' + loadMs + ' ms.';
     }
     engine.start(selected);
-    document.querySelector('#close-preview')?.focus();
+    sceneCanvas?.focus({ preventScroll: true });
   } catch (error) {
     stopPreviewEngine();
     dialog.close();
@@ -544,7 +544,7 @@ async function bootstrap() {
 
   const sessionLink = document.querySelector('#panel-link');
   if (sessionLink) {
-    sessionLink.href = 'http://127.0.0.1:4173/panel/#/sessions';
+    sessionLink.href = 'http://127.0.0.1:4173/panel/sessions';
   }
 
   try {

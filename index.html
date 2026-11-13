@@ -12,7 +12,7 @@
     <header class="masthead">
       <div class="brand"><span class="brand-icon" aria-hidden="true">◉</span> Seatview</div>
       <span class="badge"><span aria-hidden="true"></span> ETKİLEŞİMLİ PROTOTİP</span>
-      <a id="panel-link" class="badge" href="/panel/#/sessions" style="text-decoration:none;color:inherit">← Panel</a>
+      <a id="panel-link" class="badge" href="/panel/sessions" style="text-decoration:none;color:inherit">← Panel</a>
     </header>
     <section class="intro" aria-labelledby="page-title">
       <p class="eyebrow">MERIDIAN SİNEMASI / SALON 03</p>
@@ -54,7 +54,12 @@
       <p id="preview-loading" class="preview-loading" hidden aria-live="polite">Görüş modülü yükleniyor…</p>
       <p id="preview-load-hint" class="preview-load-hint" hidden></p>
       <button id="close-preview" class="close" type="button" aria-label="Haritaya dön">‹</button>
+      <div class="pan-controls" role="group" aria-label="Sağa sola bakış">
+        <button type="button" class="pan-btn" data-preview-pan="left" aria-label="Sola bak">←</button>
+        <button type="button" class="pan-btn" data-preview-pan="right" aria-label="Sağa bak">→</button>
+      </div>
       <span class="view-tag" id="view-tag"></span>
+      <p class="pan-hint" id="pan-hint">Sürükle veya oklarla sağa–sola bak</p>
     </div>
     <div class="preview-info">
       <p class="eyebrow" id="preview-eyebrow">KOLTUK GÖRÜŞÜ · SİMÜLASYON</p>

@@ -1,3 +1,6 @@
+# Opsiyonel demo web (API bu makinede :3000 çalışıyor olmalı):
+#   docker compose --profile demo up demo-web
+#   SEATVIEW_API_ORIGIN ile API adresini override edebilirsiniz.
 services:
   postgres:
     image: postgres:16-alpine
@@ -9,6 +12,27 @@ services:
       - '5432:5432'
     volumes:
       - seatview_pg:/var/lib/postgresql/data
+
+  demo-web:
+    profiles: [demo]
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - '4173:4173'
+    environment:
+      PORT: '4173'
+      SEATVIEW_API_ORIGIN: ${SEATVIEW_API_ORIGIN:-http://host.docker.internal:3000}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    command:
+      - sh
+      - -c
+      - |
+        npm install --prefix panel-ui
+        npm run panel:build
+        node dev.mjs
 
 volumes:
   seatview_pg:

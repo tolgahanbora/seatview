@@ -73,6 +73,33 @@ OpenAPI: [`api/openapi.yaml`](api/openapi.yaml) · API setup details: [`api/READ
 - **Docker** (for PostgreSQL)
 - **npm**
 
+### One-command local demo (recommended)
+
+Postgres + API seed + panel build + widget/panel on **:4173** (Ctrl+C stops API and web):
+
+```bash
+npm run demo
+```
+
+| URL | What |
+|-----|------|
+| [http://127.0.0.1:4173/panel/sessions](http://127.0.0.1:4173/panel/sessions) | Operator panel |
+| [http://127.0.0.1:4173](http://127.0.0.1:4173) | Seat map widget |
+
+Optional third terminal: `npm run customer:dev` → [http://127.0.0.1:4280](http://127.0.0.1:4280) (embed + checkout demo).
+
+**API & CORS:** On `:4173`, the panel calls `/api-seatview`, which `dev.mjs` proxies to Nest on `:3000` — same origin, no browser CORS. Direct calls to `:3000` (e.g. `panel:dev` on `:5174` or a custom `VITE_API_BASE`) require allowed origins; defaults include `4173`, `5174`, and `4280`. Extra origins: `SEATVIEW_CORS_ORIGINS=https://panel.example.com` (comma-separated).
+
+**Docker (optional):** Widget/panel only in a container — API must already run on the host (`npm run api:dev`):
+
+```bash
+docker compose --profile demo up demo-web
+```
+
+Set `SEATVIEW_API_ORIGIN` if the API is not `http://host.docker.internal:3000` (see `docker-compose.yml`).
+
+### Manual setup (step by step)
+
 ### 1. Database
 
 ```bash
@@ -109,8 +136,16 @@ In a second terminal, from the repo root:
 npm run dev
 ```
 
-- Widget: [http://127.0.0.1:4173](http://127.0.0.1:4173)  
-- Panel: [http://127.0.0.1:4173/panel/#/sessions](http://127.0.0.1:4173/panel/#/sessions)
+Panel üzerinde kod değiştiriyorsan (4173’te anında güncelleme):
+
+```bash
+npm run dev:watch
+```
+
+- Widget: [http://127.0.0.1:4173](http://127.0.0.1:4173)
+- Operatör paneli: [http://127.0.0.1:4173/panel/sessions](http://127.0.0.1:4173/panel/sessions) — `panel-ui/dist` statik sunum + `/api-seatview` proxy
+- Plan editörü: Salonlar → «Plan editörü»; taslak rotası `/panel/editor/:draftId`
+- Panel HMR (ayrı port): `npm run panel:dev` → [http://127.0.0.1:5174/panel/](http://127.0.0.1:5174/panel/)
 
 ### 4. Embedded demo (optional)
 
@@ -138,7 +173,7 @@ For a calibrated 48-seat hall, publish the plan from the panel and optionally se
 seatview-starter/
 ├── api/                 # NestJS API, migrations, integration tests
 ├── src/                 # Embeddable widget (seat map, preview, geometry)
-├── panel/               # Operator UI (sessions, plan editor)
+├── panel-ui/            # Operator panel (Vite + React + ReUI)
 ├── embed/customer-demo/ # Cross-origin ticket shop demo
 ├── docs/                # Performance and sprint notes
 ├── scripts/             # DB setup, preview benchmarks
@@ -163,7 +198,11 @@ seatview-starter/
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Widget + panel on `:4173` |
+| `npm run demo` | Postgres + API + panel build + `:4173` (tek komut) |
+| `npm run dev` | Widget + panel on `:4173` (önce `predev` ile bir kez build) |
+| `npm run dev:watch` | Aynı port; `panel-ui` değişince otomatik `dist` yeniler |
+| `npm run panel:dev` | Panel HMR on `:5174` (en hızlı UI döngüsü) |
+| `npm run panel:build` | Tek seferlik production build → `panel-ui/dist` |
 | `npm run customer:dev` | Demo shop on `:4280` |
 | `npm run api:dev` | API watch mode |
 | `npm run api:test` | Integration tests (needs Postgres) |

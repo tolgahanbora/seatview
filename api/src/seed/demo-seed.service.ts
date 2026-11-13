@@ -8,6 +8,7 @@ import { SessionEntity } from '../entities/session.entity';
 import { SeatEntity } from '../entities/seat.entity';
 import { InventoryEntity } from '../entities/inventory.entity';
 import { loadHallSeatsFromDemo } from '../hall-from-demo';
+import { buildLegacy108PlanLayout, demoSeatPositions } from '../legacy-108-layout';
 import {
   DEMO_API_KEY,
   DEMO_BUSINESS_ID,
@@ -97,17 +98,30 @@ export class DemoSeedService {
       if (existingV1Seats === 0) {
         await manager.save(
           SeatEntity,
-          demoSeats.map((seat) => ({
-            planVersionId: DEMO_PLAN_V1_ID,
-            id: seat.id,
-            hallPlanId: DEMO_HALL_PLAN_ID,
-            row: seat.row,
-            column: seat.column,
-            category: seat.category,
-            price: seat.price,
-          })),
+          demoSeats.map((seat) => {
+            const pos = demoSeatPositions(seat);
+            return {
+              planVersionId: DEMO_PLAN_V1_ID,
+              id: seat.id,
+              hallPlanId: DEMO_HALL_PLAN_ID,
+              row: seat.row,
+              column: seat.column,
+              category: seat.category,
+              price: seat.price,
+              posX: pos.x,
+              posY: pos.y,
+              posZ: pos.z,
+            };
+          }),
         );
       }
+
+      const legacyLayout = buildLegacy108PlanLayout(demoSeats);
+      await manager.update(
+        PlanVersionEntity,
+        { id: DEMO_PLAN_V1_ID },
+        { layoutSnapshot: legacyLayout },
+      );
 
       const existingV2Seats = await manager.count(SeatEntity, {
         where: { planVersionId: DEMO_PLAN_V2_ID },

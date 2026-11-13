@@ -38,6 +38,8 @@ Ortam değişkenleri:
 - `TYPEORM_SYNCHRONIZE=1` — entity’lerden şema (dev)
 - `TYPEORM_MIGRATIONS_RUN=1` — başlangıçta migration
 - `SEATVIEW_SKIP_SEED=1` — `run-seed.ts` / test için otomatik seed kapalı
+- `SEATVIEW_CORS_ORIGINS` — virgülle ek origin (panel/widget doğrudan `:3000` çağırıyorsa)
+- `SEATVIEW_LISTEN_HOST` — varsayılan `127.0.0.1`; konteyner/host dışı erişim için `0.0.0.0`
 
 ## Yeni API (S1-03)
 
